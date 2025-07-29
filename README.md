@@ -6,7 +6,7 @@ This is a simple web-based live translation project that lets you convert words 
 
  🔴 Demo Screenshot
 
-![Demo Screenshot](screenshot.png)
+![Demo Screenshot](Screenshot-live-translator.png)
 
 ---
 
