@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Live Translator | EN ⇄ HI</title>
+    <style>
+      body {
+        font-family: Arial;
+        background-color: #f9f9f9;
+        padding: 40px;
+      }
+      h2 {
+        color: #333;
+      }
+      textarea {
+        width: 100%;
+        height: 100px;
+        font-size: 16px;
+        padding: 10px;
+        margin-top: 10px;
+      }
+      .output {
+        margin-top: 20px;
+        font-size: 20px;
+        padding: 15px;
+        background-color: #fff;
+        border-left: 5px solid #007bff;
+      }
+      .controls {
+        margin-top: 10px;
+      }
+      button {
+        padding: 8px 15px;
+        margin-right: 10px;
+        font-size: 14px;
+        cursor: pointer;
+      }
+      #direction {
+        font-weight: bold;
+        margin-top: 5px;
+        color: #555;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>🌐 Live Translator</h2>
+    <div id="direction">English ➡️ Hindi</div>
+    <textarea id="inputText" placeholder="Start Typing From Here..."></textarea>
+
+    <div class="controls">
+      <button onclick="copyText()">📋 Copy</button>
+      <button onclick="speakText()">🔈 Speak</button>
+      <button onclick="swapDirection()">🔄 Swap Direction</button>
+    </div>
+
+    <div class="output" id="translatedText">
+      Translated text will appear here...
+    </div>
+
+    <script>
+      const input = document.getElementById("inputText");
+      const output = document.getElementById("translatedText");
+      const directionLabel = document.getElementById("direction");
+
+      let timer;
+      let fromLang = "en"; // source
+      let toLang = "hi"; // target
+
+      input.addEventListener("input", () => {
+        clearTimeout(timer);
+        timer = setTimeout(translateText, 500);
+      });
+
+      async function translateText() {
+        const text = input.value.trim();
+        if (text === "") {
+          output.innerText = "Translated text will appear here...";
+          return;
+        }
+
+        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${fromLang}&tl=${toLang}&dt=t&q=${encodeURIComponent(
+          text
+        )}`;
+
+        try {
+          const res = await fetch(url);
+          const data = await res.json();
+          const translated = data[0].map((item) => item[0]).join("");
+          output.innerText = translated;
+        } catch (err) {
+          output.innerText = "Translation failed. Please check your internet.";
+        }
+      }
+
+      function copyText() {
+        navigator.clipboard
+          .writeText(output.innerText)
+          .then(() => alert("✅ Copied to clipboard!"))
+          .catch(() => alert("❌ Copy failed!"));
+      }
+
+      function speakText() {
+        const text = output.innerText;
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = toLang === "hi" ? "hi-IN" : "en-US";
+        speechSynthesis.speak(utterance);
+      }
+
+      function swapDirection() {
+        [fromLang, toLang] = [toLang, fromLang];
+        directionLabel.innerText = `${
+          fromLang === "en" ? "English" : "Hindi"
+        } ➡️ ${toLang === "hi" ? "Hindi" : "English"}`;
+        input.value = "";
+        output.innerText = "Translated text will appear here...";
+      }
+    </script>
+  </body>
+</html>
+
+<!-- Features
+ 
+1. No API key required
+
+2. No page refresh
+
+3. Typing ke 500ms baad translate hota hai (debounce effect)
+
+4. Full sentence context me translate hota hai -->
